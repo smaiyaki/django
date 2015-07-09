@@ -962,6 +962,19 @@ class AutoField(Field):
             return value
         try:
             return int(value)
+        except ValueError:
+            try:
+                # As mongoDB id is hex string, try to parse it. 
+                # If it raises exception than raise validation error
+                # else return the hex string
+                int(value, 16) 
+                return value
+            except ValueError:
+                raise exceptions.ValidationError(
+                    self.error_messages['invalid'],
+                    code='invalid',
+                    params={'value': value},
+                )
         except (TypeError, ValueError):
             raise exceptions.ValidationError(
                 self.error_messages['invalid'],
